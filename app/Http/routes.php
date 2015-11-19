@@ -3,11 +3,11 @@
 get('/', 'Home@show')->name('home.index');
 
 get('pls/open_door/wow/cold_out_here', 'Users@login')->name('user.login')->middleware('guest');
-post('pls/open_door/wow/cold_out_here', 'Users@login')->name('user.auth')->middleware('guest');
+post('pls/open_door/wow/cold_out_here/bark', 'Users@auth')->name('user.auth')->middleware('guest');
 get('pls/i_am_doge', 'Users@register')->name('user.register')->middleware('guest');
 post('pls/i_am_doge', 'Users@store')->name('user.store')->middleware('guest');
 
-get('bye', 'Users@logout')->name('user.logout')->middleware('user.logout');
+get('bye', 'Users@logout')->name('user.logout')->middleware('auth');
 
 get('customs/who_dat_shibe/wow/{id}', 'Users@show')->name('user.show');
 

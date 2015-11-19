@@ -11,7 +11,7 @@ class User extends Model implements Authenticatable
 
     public $table = "users";
 
-    protected $fillable = [ "username", "email", "password" ];
+    protected $fillable = [ "username", "email", "password", "password_confirmation" ];
     protected $hidden = [ "password" ];
 
     public $createRules = [
@@ -26,8 +26,14 @@ class User extends Model implements Authenticatable
             $v = \Validator::make($user->getAttributes(), $user->createRules);
 
             if ($v->fails()) {
-                throw new ValidationException($v);
+                throw ValidationException::fromValidator($v);
             }
+
+            // We don't want to serialize the password confirmation.
+            unset($user->attributes['password_confirmation']);
+
+            // We also need to hash the password
+            $user->password = \Hash::make($user->password);
         });
     }
 

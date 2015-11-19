@@ -9,10 +9,7 @@
         <div class="pure-u-1-2">
             <h1>shibe customs very skeptical of you wow</h1>
 
-            @if (Session::has('flash_error'))
-                <div class="error">{{ Session::get('flash_error') }}</div><br/>
-            @endif
-            {!! Form::open([ 'class' => 'pure-form pure-form-aligned' ]) !!}
+            {!! Form::open([ 'route' => 'user.auth', 'method' => 'POST', 'class' => 'pure-form pure-form-aligned' ]) !!}
             <div class="pure-control-group">
                 {!! Form::label('username') !!}
                 {!! Form::text('username') !!}

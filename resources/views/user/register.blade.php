@@ -8,16 +8,6 @@
     <div class="pure-g">
         <div class="pure-u-1-2">
             <h2>doge documentation</h2>
-            @if($errors->count() > 0)
-                <div class='error'>
-                    wow such error pls fix:
-                    <ul>
-                        @foreach($errors->all() as $message)
-                            <li>{{ $message }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
             {!! Form::open([ 'class' => 'pure-form pure-form-aligned' ]) !!}
                 <div class="pure-control-group">
                     {!! Form::label('username') !!}

@@ -44,7 +44,7 @@ class Users extends Controller
                 ]));
         }
 
-        return redirect('user.show', $this->auth->user()->id);
+        return redirect()->route('user.show', $this->auth->user()->id);
     }
 
     /**
@@ -53,7 +53,7 @@ class Users extends Controller
      */
     public function logout()
     {
-        Auth::logout();
+        $this->auth->logout();
         return redirect()->route('home.index');
     }
 
@@ -71,6 +71,7 @@ class Users extends Controller
     /**
      * Creates a new User.
      *
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
@@ -79,7 +80,7 @@ class Users extends Controller
         $attributes['password_confirmation'] = $request->input('password_confirmation');
 
         try {
-            $user = $this->userRepository->create($attributes);
+            $user = $this->users->create($attributes);
             $this->auth->login($user);
             return redirect()->route('user.show', $user->id);
         } catch (ValidationException $exception) {
@@ -97,16 +98,9 @@ class Users extends Controller
      */
     public function show($id)
     {
-        try {
-            $user = $this->userRepository->find($id);
-            $shibes = $this->userRepository->getShibesForUser($id);
+        $user = $this->users->findOrFail($id);
 
-            return view('user.show')
-                ->with('user', $user)
-                ->with('shibes', $shibes);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $exception) {
-            App::abort(404, "Could not find the specified user");
-            return 1;
-        }
+        return view('user.show')
+            ->with('user', $user);
     }
 }

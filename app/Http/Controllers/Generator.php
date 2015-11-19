@@ -2,6 +2,11 @@
 
 namespace Depotwarehouse\SoDoge\Http\Controllers;
 
+use Depotwarehouse\SoDoge\Model\Shibe;
+use Illuminate\Http\Request;
+use Intervention\Image\ImageManager;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 class Generator extends Controller
 {
     /**
@@ -16,53 +21,53 @@ class Generator extends Controller
 
 
     /**
-     * Show the editor.
+     * Show the shibe editor.
      *
      * @param $hash
      * @return \Illuminate\View\View
      */
     public function create($hash)
     {
-        $file = Config::get('app.base_upload_dir') . $hash;
-        if (!file_exists($file)) {
-            $file = false;
-            // TODO throw an exception here.
-        } else {
-            $image = array();
-            $image['width'] = getimagesize($file)[0];
-            $image['height'] = getimagesize($file)[1];
-            $image['path'] = explode("public", $file)[1];
-            $image['hash'] = $hash;
-            $file = $image;
+        $filePath = config('app.base_upload_dir') . $hash;
+        if (!\File::exists($filePath)) {
+            throw new NotFoundHttpException("Couldn't find file {$hash}");
         }
-        return View::make('generator/create', array('image' => $file));
+
+        $image = [];
+        $image['width'] = getimagesize($filePath)[0];
+        $image['height'] = getimagesize($filePath)[1];
+        // The path will start with "public" which we want to remove.
+        $image['path'] = explode("public", $filePath)[1];
+        $image['hash'] = $hash;
+
+        return view('generator.create')
+            ->with('image', $image);
     }
 
 
-    public function store($hash)
+    public function store($hash, Request $request, ImageManager $imageService)
     {
 
-        if (!Input::has('phrases')) {
-            return Response::json(array(
+        if (!$request->has('phrases')) {
+            return response()->json([
                 'status' => 1,
                 'message' => "You did not seem to have uploaded any phrases",
                 'data' => null
-            ));
+            ]);
         }
 
-        $path = Config::get('app.base_upload_dir') . $hash;
-        if (!file_exists($path)) {
-            return Response::json(array(
+        $baseFilePath = config('app.base_upload_dir') . $hash;
+        if (!\File::exists($baseFilePath)) {
+            return response()->json(array(
                 'status' => 1,
                 'message' => "Base file not found. You can save this data file for use later",
-                'data' => Input::get('phrases')
+                'data' => $request->input('phrases')
             ));
         }
 
-
-        $img = Image::make($path);
+        $img = $imageService->make($baseFilePath);
         $fontFile = storage_path() . '/fonts/comicsans.ttf';
-        foreach (Input::get("phrases") as $phrase) {
+        foreach ($request->input("phrases") as $phrase) {
             $img->text(
                 $phrase['text'],
                 $phrase['x_pos'],
@@ -75,25 +80,27 @@ class Generator extends Controller
                 }
             );
         }
+
         $ext = explode(".", $hash)[1];
-        $tmpPath = Config::get('app.tmp_upload_dir') . explode(".", $hash)[0] . "_" . uniqid() . "." . $ext;
+        $tmpPath = config('app.tmp_upload_dir') . explode(".", $hash)[0] . "_" . uniqid() . "." . $ext;
         $img->save($tmpPath);
         $newHash = hash_file("sha256", $tmpPath);
-        rename($tmpPath, Config::get('app.finished_upload_dir') . $newHash . "." . $ext);
+        rename($tmpPath, config('app.finished_upload_dir') . $newHash . "." . $ext);
 
 
-        $shibe = new Shibe;
-        if (Auth::check()) {
-            $shibe->user_id = Auth::user()->id;
+        $shibe = new Shibe();
+        if (\Auth::check()) {
+            $shibe->user_id = \Auth::user()->id;
         }
-        if (Input::has("title")) {
-            $shibe->title = Input::get('title');
+        if ($request->has("title")) {
+            $shibe->title = $request->input('title');
         }
         $shibe->hash = $newHash . "." . $ext;
         $shibe->save();
-        return Response::json(array(
+
+        return response()->json([
             'status' => 0,
-            'new_file' => $newHash . "." . $ext
-        ));
+            'new_file' => $shibe->hash
+        ]);
     }
 }
