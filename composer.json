@@ -9,7 +9,8 @@
         "laravel/framework": "5.1.*",
         "depotwarehouse/toolbox": "^3.0",
         "intervention/image": "^2.3",
-        "illuminate/html": "^5.0"
+        "illuminate/html": "^5.0",
+        "depotwarehouse/blumba": "^0.0.8"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

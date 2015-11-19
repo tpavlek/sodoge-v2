@@ -2,7 +2,10 @@
 
 namespace Depotwarehouse\SoDoge\Http\Controllers;
 
+use Depotwarehouse\SoDoge\Model\GeneratesImages;
 use Depotwarehouse\SoDoge\Model\Shibe;
+use Depotwarehouse\SoDoge\Model\ValueObjects\Phrase;
+use Illuminate\Auth\Guard;
 use Illuminate\Http\Request;
 use Intervention\Image\ImageManager;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -45,7 +48,7 @@ class Generator extends Controller
     }
 
 
-    public function store($hash, Request $request, ImageManager $imageService)
+    public function store($hash, Request $request, GeneratesImages $generatesImages, Guard $auth, Shibe $shibes)
     {
 
         if (!$request->has('phrases')) {
@@ -58,45 +61,31 @@ class Generator extends Controller
 
         $baseFilePath = config('app.base_upload_dir') . $hash;
         if (!\File::exists($baseFilePath)) {
-            return response()->json(array(
+            return response()->json([
                 'status' => 1,
                 'message' => "Base file not found. You can save this data file for use later",
                 'data' => $request->input('phrases')
-            ));
+            ]);
         }
 
-        $img = $imageService->make($baseFilePath);
-        $fontFile = storage_path() . '/fonts/comicsans.ttf';
-        foreach ($request->input("phrases") as $phrase) {
-            $img->text(
-                $phrase['text'],
-                $phrase['x_pos'],
-                $phrase['y_pos'],
-                function ($font) use ($phrase, $fontFile) {
-                    $font->color = $phrase['color'];
-                    $font->file = $fontFile;
-                    $font->size = $phrase['font_size'];
-                    $font->valign = "top"; // The frontend expects vertical alignment to be on the top
-                }
-            );
+        $phrases = collect($request->input('phrases'))->map(function ($phrase) {
+            return new Phrase($phrase['text'], $phrase['x_pos'], $phrase['y_pos'], $phrase['color'], $phrase['font_size']);
+        });
+
+        $newHash = $generatesImages->generate($hash, $phrases);
+
+        $attributes = [
+            'hash' => $newHash
+        ];
+        if ($auth->check()) {
+            $attributes['user_id'] = $auth->user()->id;
         }
 
-        $ext = explode(".", $hash)[1];
-        $tmpPath = config('app.tmp_upload_dir') . explode(".", $hash)[0] . "_" . uniqid() . "." . $ext;
-        $img->save($tmpPath);
-        $newHash = hash_file("sha256", $tmpPath);
-        rename($tmpPath, config('app.finished_upload_dir') . $newHash . "." . $ext);
-
-
-        $shibe = new Shibe();
-        if (\Auth::check()) {
-            $shibe->user_id = \Auth::user()->id;
-        }
         if ($request->has("title")) {
-            $shibe->title = $request->input('title');
+            $attributes['title'] = $request->input('title');
         }
-        $shibe->hash = $newHash . "." . $ext;
-        $shibe->save();
+
+        $shibe = $shibes->create($attributes);
 
         return response()->json([
             'status' => 0,
