@@ -27,7 +27,7 @@
             </div>
             <br />
             <br />
-            <a href="{{ URL::route('generator.index') }}" class="pure-button pure-button-good size-120">
+            <a href="{{ URL::route('generator.show') }}" class="pure-button pure-button-good size-120">
                 play wif own doge
             </a>
         </div>

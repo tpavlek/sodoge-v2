@@ -2,6 +2,7 @@
 
 namespace Depotwarehouse\SoDoge\Model;
 
+use File;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -27,7 +28,7 @@ class Shibe extends Model
     {
         $shibe = $this->findByHash($hash);
 
-        if (!file_exists($shibe->finished_path)) {
+        if (!File::exists($shibe->finished_path)) {
             throw new ModelNotFoundException("Could not find the associated image file for shibe ID: {$shibe->id}");
         }
 

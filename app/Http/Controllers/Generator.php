@@ -4,23 +4,14 @@ namespace Depotwarehouse\SoDoge\Http\Controllers;
 
 class Generator extends Controller
 {
-    /** @var \Depotwarehouse\SoDoge\Repositories\ShibeRepository  */
-    protected $shibeRepository;
-
-    public function __construct(\Depotwarehouse\SoDoge\Repositories\ShibeRepository $shibeRepository)
-    {
-        $this->shibeRepository = $shibeRepository;
-    }
-
-
     /**
      * Show the form to begin creation of a Shibe.
      *
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function show()
     {
-        return View::make('generator/index');
+        return view('generator.show');
     }
 
 
@@ -45,11 +36,6 @@ class Generator extends Controller
             $file = $image;
         }
         return View::make('generator/create', array('image' => $file));
-    }
-
-    private function getPhrasesFromArray(array $input)
-    {
-
     }
 
 
@@ -109,39 +95,5 @@ class Generator extends Controller
             'status' => 0,
             'new_file' => $newHash . "." . $ext
         ));
-    }
-
-    /**
-     * Display a completed Shibe.
-     *
-     * Has a side effect of incrementing the current views of that shibe by one.
-     *
-     * @param $hash
-     * @return \Illuminate\View\View
-     */
-    public function show($hash)
-    {
-        try {
-            $shibe = $this->shibeRepository->findByHash($hash);
-            $filePath = Config::get('app.finished_upload_dir') . $hash;
-
-            if (!file_exists($filePath)) {
-                App::abort(404, 'shibe gone wow');
-                Log::error('Shibe with ID: ' . $shibe->id . " not found");
-            }
-
-            $shibe->views++;
-            $shibe->save();
-
-            // We know the finished upload dir has the "string" public in it. We want everything after that.
-            $imagePath = explode("public", $filePath)[1];
-            return view('shibe.show')
-                ->with('imagePath', $imagePath)
-                ->with('shibe', $shibe);
-
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $exception) {
-            App::abort(404, 'doge not found');
-            return 1;
-        }
     }
 }

@@ -5,6 +5,7 @@ namespace Depotwarehouse\SoDoge\Tests\Model;
 use Depotwarehouse\SoDoge\Model\Shibe;
 use Depotwarehouse\SoDoge\Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use File;
 
 class ShibeTest extends TestCase
 {
@@ -51,10 +52,27 @@ class ShibeTest extends TestCase
 
         $shibes = new Shibe();
 
+        File::shouldReceive('exists')->andReturn(true);
         $shibe = $shibes->view("some_hash");
 
         $this->assertInstanceOf(Shibe::class, $shibe);
         $this->seeInDatabase('shibes', [ 'hash' => 'some_hash', 'views' => 3 ]);
+    }
+
+    /**
+     * @test
+     * @expectedException \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public function it_throws_exception_when_trying_to_view_a_file_that_does_not_exist()
+    {
+        Shibe::create([ 'hash' => 'some_hash', 'views' => 2 ]);
+
+        $shibes = new Shibe();
+
+        File::shouldReceive('exists')->andReturn(false);
+        $shibe = $shibes->view("some_hash");
+
+        $this->fail("A ModelNotFoundException should be thrown");
     }
 
 }

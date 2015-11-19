@@ -2,20 +2,25 @@
 
 namespace Depotwarehouse\SoDoge\Http\Controllers;
 
+use Depotwarehouse\SoDoge\Http\Requests\Request;
+use Depotwarehouse\SoDoge\Model\SavesAssets;
+
 class Assets extends Controller
 {
 
-    public function upload()
-    {
-        $file = Input::file('shibe');
-        $hash = hash_file('sha256', $file->getRealPath());
-        $filename = $hash . "." . $file->getClientOriginalExtension();
-        if (file_exists(Config::get('app.base_upload_dir') . $filename)) {
-            return Response::json(array( 'status' => 0, 'hash' => $filename ));
-        }
+    protected $savesAssets;
 
-        $file->move(Config::get('app.base_upload_dir'), $filename);
-        return Response::json(array( 'status' => 0, 'hash' => $filename ));
+    public function __construct(SavesAssets $savesAssets)
+    {
+        $this->savesAssets = $savesAssets;
+    }
+
+    public function upload(Request $request)
+    {
+        $file = $request->file('shibe');
+        $filename = $this->savesAssets->save($file);
+
+        return response()->json([ 'status' => 0, 'hash' => $filename ]);
     }
 
 }

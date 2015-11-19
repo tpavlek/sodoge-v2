@@ -6,7 +6,7 @@
 @endif
 
 <section id="nav">
-  <a href="{{ URL::route('generator.index') }}" class="pure-button pure-button-good size-150 nav-button">
+  <a href="{{ URL::route('generator.show') }}" class="pure-button pure-button-good size-150 nav-button">
     new shibe 4 u
   </a>
   <a href="{{ URL::route('home.index') }}" class="pure-button pure-button-orange size-140 nav-button">
