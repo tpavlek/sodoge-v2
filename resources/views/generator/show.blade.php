@@ -56,6 +56,7 @@
             $('.fileUpload-text').html("process shibe now wow many fast");
             var myData = new FormData();
             myData.append('shibe', $(this)[0].files[0]);
+            myData.append('_token', '{{ csrf_token() }}');
             $.ajax({
                 url: "{{ URL::route('asset.upload') }}",
                 type: "POST",

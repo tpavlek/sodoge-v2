@@ -2,7 +2,7 @@
 
 namespace Depotwarehouse\SoDoge\Http\Controllers;
 
-use Depotwarehouse\SoDoge\Http\Requests\Request;
+use Illuminate\Http\Request;
 use Depotwarehouse\SoDoge\Model\SavesAssets;
 
 class Assets extends Controller
@@ -22,5 +22,4 @@ class Assets extends Controller
 
         return response()->json([ 'status' => 0, 'hash' => $filename ]);
     }
-
 }
