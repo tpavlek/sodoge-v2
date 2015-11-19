@@ -2,6 +2,7 @@
 
 namespace Depotwarehouse\SoDoge\Console;
 
+use Depotwarehouse\SoDoge\Console\Commands\CleanUpOldImages;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -13,7 +14,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        \Depotwarehouse\SoDoge\Console\Commands\Inspire::class,
+        CleanupOldImages::class,
     ];
 
     /**
@@ -24,7 +25,5 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('inspire')
-                 ->hourly();
     }
 }
