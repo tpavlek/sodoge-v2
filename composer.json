@@ -24,7 +24,8 @@
         ],
         "psr-4": {
             "Depotwarehouse\\SoDoge\\": "app/",
-            "Depotwarehouse\\SoDoge\\Model\\": "Model/"
+            "Depotwarehouse\\SoDoge\\Model\\": "Model/",
+            "Depotwarehouse\\SoDoge\\Tests\\": "tests/"
         }
     },
     "autoload-dev": {

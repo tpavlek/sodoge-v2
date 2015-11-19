@@ -135,7 +135,7 @@ class Generator extends Controller
 
             // We know the finished upload dir has the "string" public in it. We want everything after that.
             $imagePath = explode("public", $filePath)[1];
-            return View::make('generator.show')
+            return view('shibe.show')
                 ->with('imagePath', $imagePath)
                 ->with('shibe', $shibe);
 

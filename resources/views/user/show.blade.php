@@ -14,7 +14,7 @@ Username is: {{ $user->username }}
 
 <h2>User Shibes</h2>
 @forelse($shibes as $shibe)
-  <a href="{{ URL::route('generator.show', $shibe->hash) }}">
+  <a href="{{ URL::route('shibe.show', $shibe->hash) }}">
     {{ $shibe->title }}<br />
   </a>
   @empty
